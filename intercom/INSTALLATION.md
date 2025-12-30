@@ -2,14 +2,26 @@
 
 ## Installation
 
-**👉 [Download intercom.crx](https://raw.githubusercontent.com/abugodev/chrome-extensions/main/intercom/intercom.crx) - Click here to download**
+### Option 1: Install from folder (Recommended - Works best on Mac)
+
+**👉 [Download intercom.zip](https://raw.githubusercontent.com/abugodev/chrome-extensions/main/intercom/intercom.zip) - Click here to download**
 
 Once downloaded:
 
-**On Mac:** If the file seems to disappear after downloading:
-- Open Chrome and press `Cmd + Shift + J` to view downloads
-- Find `intercom.crx` in the list and click "Show in Finder"
-- **Alternative:** Right-click the download link above → "Save Link As..." → Choose Desktop or another location
+1. Extract the `intercom.zip` file (double-click on Mac, or right-click → Extract on Windows)
+2. Open Chrome and type `chrome://extensions/` in the address bar (or copy-paste it)
+3. Enable **"Developer mode"** (toggle in the top right corner)
+4. Click **"Load unpacked"**
+5. Select the extracted `intercom` folder
+6. Done! The extension is now installed
+
+### Option 2: Install from .crx file (Alternative)
+
+**👉 [Download intercom.crx](https://raw.githubusercontent.com/abugodev/chrome-extensions/main/intercom/intercom.crx) - Click here to download**
+
+**Note:** On Mac, the .crx file may be automatically deleted by macOS security. If this happens, use Option 1 instead.
+
+Once downloaded:
 
 1. Open Chrome and type `chrome://extensions/` in the address bar (or copy-paste it)
 2. Enable **"Developer mode"** (toggle in the top right corner)
@@ -37,7 +49,7 @@ Once downloaded:
 ## How to Update Extension
 
 To update the extension, proceed the same as when installing:
-1. Download the latest `intercom.crx` file from the download link above
+1. Download the latest `intercom.zip` file (or `intercom.crx` if using that method)
 2. Follow the installation steps (the new version will replace the old one automatically)
 
 ## Troubleshooting
@@ -47,11 +59,9 @@ To update the extension, proceed the same as when installing:
 - Go to `chrome://extensions/` and try reloading the extension (click the refresh icon 🔄)
 - Refresh the Intercom page
 
-**Can't find the downloaded .crx file on Mac?**
-- Check your Downloads folder: `~/Downloads`
-- Open Finder, press `Cmd + Shift + G`, type `~/Downloads`
-- Check your browser's download history (Chrome: `Cmd + Shift + J`)
-- Try downloading again and watch where it saves
+**Having issues with .crx file on Mac?**
+- macOS often deletes .crx files for security reasons
+- **Solution:** Use Option 1 (zip file method) instead - it's more reliable on Mac
 
 **Button is disabled?**
 - The article must be in English for the button to work
