@@ -20,7 +20,7 @@ zip -r intercom-store.zip . \
   -x "SHARING.md" \
   -x "create-store-zip.sh" \
   -x "sidebar.html" \
-  -x "icon.png" \
+  -x "assets/icon.png" \
   -x ".DS_Store" \
   -x "*/.DS_Store"
 
