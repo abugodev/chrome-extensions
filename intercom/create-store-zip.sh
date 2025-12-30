@@ -16,6 +16,8 @@ zip -r intercom-store.zip . \
   -x "PUBLISHING.md" \
   -x "SHARING.md" \
   -x "create-store-zip.sh" \
+  -x "sidebar.html" \
+  -x "icon.png" \
   -x ".DS_Store"
 
 echo "✅ Created intercom-store.zip"
