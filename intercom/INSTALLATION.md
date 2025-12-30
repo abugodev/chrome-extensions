@@ -6,6 +6,12 @@
 
 Once downloaded:
 
+**On Mac:** The file might be in your Downloads folder. If you can't find it:
+- Open Finder and press `Cmd + Shift + G`
+- Type `~/Downloads` and press Enter
+- Look for `intercom.crx` file
+- If it's not there, check your browser's download history and click "Show in Finder"
+
 1. Open Chrome and type `chrome://extensions/` in the address bar (or copy-paste it)
 2. Enable **"Developer mode"** (toggle in the top right corner)
 3. Drag and drop the downloaded `intercom.crx` file onto the extensions page
@@ -41,6 +47,12 @@ To update the extension, proceed the same as when installing:
 - Make sure Developer mode is enabled
 - Go to `chrome://extensions/` and try reloading the extension (click the refresh icon 🔄)
 - Refresh the Intercom page
+
+**Can't find the downloaded .crx file on Mac?**
+- Check your Downloads folder: `~/Downloads`
+- Open Finder, press `Cmd + Shift + G`, type `~/Downloads`
+- Check your browser's download history (Chrome: `Cmd + Shift + J`)
+- Try downloading again and watch where it saves
 
 **Button is disabled?**
 - The article must be in English for the button to work
