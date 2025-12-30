@@ -7,7 +7,7 @@
   // ============================================================================
   // Configuration
   // ============================================================================
-  const WEBHOOK_URL = 'https://abugo.app.n8n.cloud/webhook/queue-article';
+  const WEBHOOK_URL = 'https://abugo.app.n8n.cloud/webhook/translate-article';
   const INIT_DELAY_MS = 1000;
   const INIT_AFTER_INSERT_MS = 100;
   const SIDEBAR_WAIT_TIMEOUT_MS = 5000;
@@ -174,26 +174,6 @@
   }
 
   /**
-   * Parses response from fetch request
-   * @param {Response} response
-   * @returns {Promise<string>}
-   */
-  async function parseResponse(response) {
-    const contentType = response.headers.get('content-type');
-    
-    if (contentType?.includes('application/json')) {
-      try {
-        const data = await response.json();
-        return JSON.stringify(data, null, 2);
-      } catch {
-        return await response.text().catch(() => 'No response body');
-      }
-    }
-    
-    return await response.text().catch(() => 'No response body');
-  }
-
-  /**
    * Updates button visual state based on language
    * @param {HTMLButtonElement} button
    */
@@ -340,16 +320,21 @@
     setButtonLoading(button);
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ articleId })
+      // Send message to background script to make the fetch request (avoids CORS)
+      const response = await chrome.runtime.sendMessage({
+        action: 'callWebhook',
+        url: WEBHOOK_URL,
+        payload: { id: articleId }
       });
 
-      const responseText = await parseResponse(response);
-      alert(`Webhook Response:\n\nStatus: ${response.status} ${response.statusText}\n\nResponse:\n${responseText}`);
+      if (response.success) {
+        const responseText = typeof response.data === 'object' 
+          ? JSON.stringify(response.data, null, 2) 
+          : response.data;
+        alert(`Webhook Response:\n\nStatus: ${response.status} ${response.statusText}\n\nResponse:\n${responseText}`);
+      } else {
+        throw new Error(response.error);
+      }
     } catch (error) {
       alert(`Error calling webhook:\n\n${error.message}`);
       console.error('[Intercom Actions] Webhook error:', error);
