@@ -2,8 +2,6 @@
 
 ## Installation
 
-### Option 1: Install from folder (Recommended - Works best on Mac)
-
 **👉 [Download intercom.zip](https://raw.githubusercontent.com/abugodev/chrome-extensions/main/intercom/intercom.zip) - Click here to download**
 
 Once downloaded:
@@ -14,20 +12,6 @@ Once downloaded:
 4. Click **"Load unpacked"**
 5. Select the extracted `intercom` folder
 6. Done! The extension is now installed
-
-### Option 2: Install from .crx file (Alternative)
-
-**👉 [Download intercom.crx](https://raw.githubusercontent.com/abugodev/chrome-extensions/main/intercom/intercom.crx) - Click here to download**
-
-**Note:** On Mac, the .crx file may be automatically deleted by macOS security. If this happens, use Option 1 instead.
-
-Once downloaded:
-
-1. Open Chrome and type `chrome://extensions/` in the address bar (or copy-paste it)
-2. Enable **"Developer mode"** (toggle in the top right corner)
-3. Drag and drop the downloaded `intercom.crx` file onto the extensions page
-4. Click **"Add extension"** when prompted
-5. Done! The extension is now installed
 
 ## How to Use
 
@@ -49,7 +33,7 @@ Once downloaded:
 ## How to Update Extension
 
 To update the extension, proceed the same as when installing:
-1. Download the latest `intercom.zip` file (or `intercom.crx` if using that method)
+1. Download the latest `intercom.zip` file from the download link above
 2. Follow the installation steps (the new version will replace the old one automatically)
 
 ## Troubleshooting
@@ -59,9 +43,6 @@ To update the extension, proceed the same as when installing:
 - Go to `chrome://extensions/` and try reloading the extension (click the refresh icon 🔄)
 - Refresh the Intercom page
 
-**Having issues with .crx file on Mac?**
-- macOS often deletes .crx files for security reasons
-- **Solution:** Use Option 1 (zip file method) instead - it's more reliable on Mac
 
 **Button is disabled?**
 - The article must be in English for the button to work
