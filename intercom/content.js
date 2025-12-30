@@ -195,6 +195,27 @@
     }
   }
 
+  // Check if "Save as draft" button is enabled (not disabled)
+  function isDraftButtonEnabled() {
+    // Look for button with "Save as draft" text
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const draftButton = buttons.find(btn => 
+      btn.textContent && btn.textContent.trim().includes('Save as draft')
+    );
+    
+    if (!draftButton) {
+      // If draft button doesn't exist, assume it's safe to translate
+      return false;
+    }
+    
+    // Check if button has disabled attribute or o__disabled class
+    const isDisabled = draftButton.hasAttribute('disabled') || 
+                       draftButton.classList.contains('o__disabled');
+    
+    // Return true if button is enabled (not disabled)
+    return !isDisabled;
+  }
+
   // Initialize the Actions section functionality
   function initializeActionsSection() {
     const button = document.getElementById('actions-webhook-button');
@@ -213,35 +234,72 @@
       articleIdSpan.textContent = articleId || 'Not found';
     }
 
-    // Function to update button state based on language
+    // Function to update button state based on language and draft button state
+    let lastButtonState = null;
     function updateButtonState() {
       const currentLanguage = getCurrentLanguage();
       const isEnglish = currentLanguage && currentLanguage.toLowerCase() === 'english';
+      const draftEnabled = isDraftButtonEnabled();
       const btn = document.getElementById('actions-webhook-button');
-      if (btn) {
-        btn.disabled = !isEnglish;
-        if (!isEnglish) {
-          btn.classList.add('opacity-50', 'cursor-not-allowed');
-          btn.title = 'This action is only available for English articles';
-        } else {
-          btn.classList.remove('opacity-50', 'cursor-not-allowed');
-          btn.title = '';
-        }
+      
+      if (!btn) return;
+      
+      // Disable if not English OR if draft button is enabled
+      const shouldDisable = !isEnglish || draftEnabled;
+      const newState = {
+        disabled: shouldDisable,
+        isEnglish: isEnglish,
+        draftEnabled: draftEnabled
+      };
+      
+      // Only update if state actually changed to prevent infinite loops
+      if (lastButtonState && 
+          lastButtonState.disabled === newState.disabled &&
+          lastButtonState.isEnglish === newState.isEnglish &&
+          lastButtonState.draftEnabled === newState.draftEnabled) {
+        return;
       }
+      
+      lastButtonState = newState;
+      btn.disabled = shouldDisable;
+      
+      if (!isEnglish) {
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.title = 'This action is only available for English articles';
+      } else if (draftEnabled) {
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.title = 'Please save as draft first';
+      } else {
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        btn.title = '';
+      }
+    }
+
+    // Debounce function to prevent too many rapid updates
+    let updateTimeout = null;
+    function debouncedUpdateButtonState() {
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+      }
+      updateTimeout = setTimeout(() => {
+        updateButtonState();
+      }, 100);
     }
 
     // Update button state initially
     updateButtonState();
 
-    // Watch for language changes
+    // Watch for language changes in sidebar only
+    let lastLanguage = currentLanguage;
     const languageObserver = new MutationObserver(() => {
       const newLanguage = getCurrentLanguage();
-      if (newLanguage !== currentLanguage) {
-        updateButtonState();
+      if (newLanguage !== lastLanguage) {
+        lastLanguage = newLanguage;
+        debouncedUpdateButtonState();
       }
     });
 
-    // Observe the sidebar for changes
+    // Observe only the sidebar for language changes
     const sidebar = document.querySelector('.side-panel');
     if (sidebar) {
       languageObserver.observe(sidebar, {
@@ -251,6 +309,39 @@
       });
     }
 
+    // Watch for draft button changes with more specific targeting
+    let lastDraftState = null;
+    const draftButtonObserver = new MutationObserver((mutations) => {
+      // Only update if we see relevant changes
+      let shouldUpdate = false;
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && 
+            (mutation.attributeName === 'disabled' || mutation.attributeName === 'class')) {
+          const target = mutation.target;
+          if (target.textContent && target.textContent.includes('Save as draft')) {
+            const currentDraftState = !target.hasAttribute('disabled') && 
+                                     !target.classList.contains('o__disabled');
+            if (currentDraftState !== lastDraftState) {
+              lastDraftState = currentDraftState;
+              shouldUpdate = true;
+              break;
+            }
+          }
+        }
+      }
+      if (shouldUpdate) {
+        debouncedUpdateButtonState();
+      }
+    });
+
+    // Observe document body but with throttling
+    draftButtonObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['disabled', 'class']
+    });
+
     // Remove any existing click handlers by cloning the button
     const newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
@@ -258,6 +349,12 @@
 
     // Add click handler
     freshButton.addEventListener('click', async () => {
+      // Check if draft button is enabled first
+      if (isDraftButtonEnabled()) {
+        alert('Please save as draft first');
+        return;
+      }
+
       const articleId = getArticleId();
 
       if (!articleId) {
@@ -306,15 +403,8 @@
         alert(`Error calling webhook:\n\n${error.message}`);
         console.error('Webhook error:', error);
       } finally {
-        // Re-enable button (if language is English)
-        const currentLanguage = getCurrentLanguage();
-        const isEnglish = currentLanguage && currentLanguage.toLowerCase() === 'english';
-        freshButton.disabled = !isEnglish;
-        if (!isEnglish) {
-          freshButton.classList.add('opacity-50', 'cursor-not-allowed');
-        } else {
-          freshButton.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
+        // Re-enable button (if language is English and draft is saved)
+        updateButtonState();
         const buttonContent = freshButton.querySelector('div');
         if (buttonContent) {
           buttonContent.innerHTML = `
