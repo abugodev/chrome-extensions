@@ -25,18 +25,15 @@ Once downloaded:
    - Send the article information to the webhook
    - Show you a response message in an alert
 
-## Important Notes
-
+**Important Notes:**
 - **Language requirement**: The button only works for articles in English. It will be disabled for other languages.
-
-- **Updates**: Since this extension is installed from a local `.crx` file, it won't update automatically. To get updates:
-   - Download the latest `intercom.crx` file from the link above
-   - Go to `chrome://extensions/` in Chrome
-   - Find "ABUGO Intercom actions" extension
-   - Click the **Remove** button to uninstall the old version
-   - Drag and drop the new `intercom.crx` file to install the updated version
-
 - **Permissions**: Chrome will ask for permission to access `app.intercom.com` the first time you use it - click "Allow"
+
+## How to Update Extension
+
+To update the extension, proceed the same as when installing:
+1. Download the latest `intercom.crx` file from the download link above
+2. Follow the installation steps (the new version will replace the old one automatically)
 
 ## Troubleshooting
 
@@ -49,5 +46,5 @@ Once downloaded:
 - The article must be in English for the button to work
 - Check the article language in the sidebar
 
-**Need help?** Contact the development team.
+**Need help?** Contact the development team in Slack: **#abugo_ai_automation_team**
 
