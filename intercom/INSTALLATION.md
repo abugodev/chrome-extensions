@@ -6,11 +6,10 @@
 
 Once downloaded:
 
-**On Mac:** The file might be in your Downloads folder. If you can't find it:
-- Open Finder and press `Cmd + Shift + G`
-- Type `~/Downloads` and press Enter
-- Look for `intercom.crx` file
-- If it's not there, check your browser's download history and click "Show in Finder"
+**On Mac:** If the file seems to disappear after downloading:
+- Open Chrome and press `Cmd + Shift + J` to view downloads
+- Find `intercom.crx` in the list and click "Show in Finder"
+- **Alternative:** Right-click the download link above → "Save Link As..." → Choose Desktop or another location
 
 1. Open Chrome and type `chrome://extensions/` in the address bar (or copy-paste it)
 2. Enable **"Developer mode"** (toggle in the top right corner)
