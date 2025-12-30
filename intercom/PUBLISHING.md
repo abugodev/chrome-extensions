@@ -154,9 +154,15 @@ Once approved:
 
 ## Updating the Extension
 
+**Important:** Always bump the version number when making changes!
+
 When you need to update:
 
-1. Update the version number in `manifest.json`:
+1. **Bump the version number** in `manifest.json`:
+   - Patch version (1.0.0 → 1.0.1) for bug fixes and small changes
+   - Minor version (1.0.0 → 1.1.0) for new features
+   - Major version (1.0.0 → 2.0.0) for breaking changes
+   
    ```json
    "version": "1.0.1"
    ```
