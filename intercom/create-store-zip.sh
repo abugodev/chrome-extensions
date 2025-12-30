@@ -21,6 +21,7 @@ zip -r intercom-store.zip . \
   -x "create-store-zip.sh" \
   -x "sidebar.html" \
   -x "assets/icon.png" \
+  -x "assets/screenshot.png" \
   -x ".DS_Store" \
   -x "*/.DS_Store"
 
