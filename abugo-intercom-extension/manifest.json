@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "ABUGO Intercom actions",
+  "version": "1.0.0",
+  "description": "Adds an Actions section to Intercom Knowledge Hub sidebar",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://app.intercom.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://app.intercom.com/a/apps/*/knowledge-hub/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
+
