@@ -314,14 +314,13 @@
       }
 
       try {
-        const response = await fetch(WEBHOOK_URL, {
-          method: 'POST',
+        // Use GET request with articleId as query parameter to avoid CORS issues
+        const urlWithParams = `${WEBHOOK_URL}?articleId=${encodeURIComponent(articleId)}`;
+        const response = await fetch(urlWithParams, {
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            articleId: articleId
-          })
+            'Accept': 'application/json',
+          }
         });
 
         let responseData;
