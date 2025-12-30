@@ -18,14 +18,6 @@ A Chrome extension that adds an "Actions" section to the Intercom Knowledge Hub 
 4. Click "Load unpacked"
 5. Select the `intercom` folder
 
-## Configuration
-
-Edit `content.js` and update the `WEBHOOK_URL` constant:
-
-```javascript
-const WEBHOOK_URL = 'https://your-webhook-url.com/endpoint';
-```
-
 ## Project Structure
 
 ```
@@ -87,7 +79,6 @@ To create a `.crx` file for distribution:
 
 **Button not working:**
 - Check if article language is detected correctly
-- Verify webhook URL is set correctly
 - Check browser console for network errors
 
 ## Deployment
