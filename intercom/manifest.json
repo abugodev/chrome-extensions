@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ABUGO Intercom actions",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Adds an Actions section to Intercom Knowledge Hub sidebar",
   "icons": {
     "16": "assets/icon16.png",
@@ -12,7 +12,8 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://app.intercom.com/*"
+    "https://app.intercom.com/*",
+    "https://abugo.app.n8n.cloud/*"
   ],
   "content_scripts": [
     {
