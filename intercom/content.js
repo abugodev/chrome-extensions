@@ -347,7 +347,7 @@
         alert(`Error calling webhook:\n\n${error.message}`);
         console.error('Webhook error:', error);
       } finally {
-        // Re-enable button (if language is English and draft is saved)
+        // Re-enable button (check language state)
         updateButtonState();
         const buttonContent = freshButton.querySelector('div');
         if (buttonContent) {
