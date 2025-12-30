@@ -1,27 +1,16 @@
 # How to Install and Use the ABUGO Intercom Actions Extension
 
-## Quick Installation
-
-### Option 1: Install from .crx file (Easiest - Recommended)
+## Installation
 
 **👉 [Download intercom.crx](https://raw.githubusercontent.com/abugodev/chrome-extensions/main/intercom/intercom.crx) - Click here to download**
 
 Once downloaded:
 
-1. Open Chrome and go to [chrome://extensions/](chrome://extensions/)
+1. Open Chrome and type `chrome://extensions/` in the address bar (or copy-paste it)
 2. Enable **"Developer mode"** (toggle in the top right corner)
 3. Drag and drop the downloaded `intercom.crx` file onto the extensions page
 4. Click **"Add extension"** when prompted
 5. Done! The extension is now installed
-
-### Option 2: Install from folder
-
-1. Download and extract the `intercom` folder
-2. Open Chrome and go to [chrome://extensions/](chrome://extensions/)
-3. Enable **"Developer mode"** (toggle in the top right corner)
-4. Click **"Load unpacked"**
-5. Select the `intercom` folder
-6. Done! The extension is now installed
 
 ## How to Use
 
@@ -40,10 +29,12 @@ Once downloaded:
 
 - **Language requirement**: The button only works for articles in English. It will be disabled for other languages.
 
-- **Updates**: If the extension is updated, you may need to reload it:
-   - Go to [chrome://extensions/](chrome://extensions/)
+- **Updates**: Since this extension is installed from a local `.crx` file, it won't update automatically. To get updates:
+   - Download the latest `intercom.crx` file from the link above
+   - Go to `chrome://extensions/` in Chrome
    - Find "ABUGO Intercom actions" extension
-   - Click the refresh icon (🔄) on the extension card
+   - Click the **Remove** button to uninstall the old version
+   - Drag and drop the new `intercom.crx` file to install the updated version
 
 - **Permissions**: Chrome will ask for permission to access `app.intercom.com` the first time you use it - click "Allow"
 
@@ -51,7 +42,7 @@ Once downloaded:
 
 **Extension not showing up?**
 - Make sure Developer mode is enabled
-- Try reloading the extension (refresh icon in [chrome://extensions/](chrome://extensions/))
+- Go to `chrome://extensions/` and try reloading the extension (click the refresh icon 🔄)
 - Refresh the Intercom page
 
 **Button is disabled?**
