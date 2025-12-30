@@ -2,16 +2,17 @@
 
 ## Quick Installation
 
-### Option 1: Install from .crx file (Easiest)
+### Option 1: Install from .crx file (Easiest - Recommended)
 
-**📥 [Download intercom.crx](https://raw.githubusercontent.com/abugodev/chrome-extensions/main/intercom/intercom.crx)**
+**👉 [Download intercom.crx](https://raw.githubusercontent.com/abugodev/chrome-extensions/main/intercom/intercom.crx) - Click here to download**
 
-1. Click the download link above to download the `intercom.crx` file
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable **"Developer mode"** (toggle in the top right corner)
-4. Drag and drop the `intercom.crx` file onto the extensions page
-5. Click **"Add extension"** when prompted
-6. Done! The extension is now installed
+Once downloaded:
+
+1. Open Chrome and go to `chrome://extensions/`
+2. Enable **"Developer mode"** (toggle in the top right corner)
+3. Drag and drop the downloaded `intercom.crx` file onto the extensions page
+4. Click **"Add extension"** when prompted
+5. Done! The extension is now installed
 
 ### Option 2: Install from folder
 
