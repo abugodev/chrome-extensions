@@ -4,11 +4,37 @@
 (function() {
   'use strict';
 
+  // ============================================================================
   // Configuration
-  const WEBHOOK_URL = 'https://abugo.app.n8n.cloud/webhook/queue-article'; // Placeholder URL
-  
-  // Wait for DOM to be ready
-  function waitForElement(selector, timeout = 10000) {
+  // ============================================================================
+  const WEBHOOK_URL = 'https://abugo.app.n8n.cloud/webhook/queue-article';
+  const INIT_DELAY_MS = 1000;
+  const INIT_AFTER_INSERT_MS = 100;
+  const SIDEBAR_WAIT_TIMEOUT_MS = 5000;
+  const ELEMENT_WAIT_TIMEOUT_MS = 10000;
+
+  // Button HTML templates
+  const BUTTON_HTML_IDLE = `
+    <div class="flex items-center justify-center gap-2">
+      <svg class="interface-icon o__standard" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16C12.42 16 16 12.42 16 8C16 3.58 12.42 0 8 0ZM8 14.5C4.41 14.5 1.5 11.59 1.5 8C1.5 4.41 4.41 1.5 8 1.5C11.59 1.5 14.5 4.41 14.5 8C14.5 11.59 11.59 14.5 8 14.5ZM2.5 6.5C2.8 5.2 3.4 4 4.2 3L5.5 6.5H2.5ZM2.5 9.5H5.5L4.2 13C3.4 12 2.8 10.8 2.5 9.5ZM6.5 13.8C7.8 13.5 9 12.9 10 12.1L6.5 10.8V13.8ZM6.5 5.2V8.2L10 6.9C9 6.1 7.8 5.5 6.5 5.2ZM11.8 13L10.5 9.5H13.5C13.2 10.8 12.6 12 11.8 13ZM13.5 6.5H10.5L11.8 3C12.6 4 13.2 5.2 13.5 6.5Z"></path>
+      </svg>
+      <span>Translate to all languages</span>
+    </div>
+  `;
+  const BUTTON_HTML_LOADING = '<div><span>Sending...</span></div>';
+
+  // ============================================================================
+  // Utility Functions
+  // ============================================================================
+
+  /**
+   * Waits for an element to appear in the DOM
+   * @param {string} selector - CSS selector
+   * @param {number} timeout - Timeout in milliseconds
+   * @returns {Promise<Element>}
+   */
+  function waitForElement(selector, timeout = ELEMENT_WAIT_TIMEOUT_MS) {
     return new Promise((resolve, reject) => {
       const element = document.querySelector(selector);
       if (element) {
@@ -16,10 +42,10 @@
         return;
       }
 
-      const observer = new MutationObserver((mutations, obs) => {
+      const observer = new MutationObserver(() => {
         const element = document.querySelector(selector);
         if (element) {
-          obs.disconnect();
+          observer.disconnect();
           resolve(element);
         }
       });
@@ -36,38 +62,70 @@
     });
   }
 
-  // Extract article ID from URL
+  /**
+   * Extracts article ID from URL query parameters
+   * @returns {string|null}
+   */
   function getArticleId() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('activeContentId');
   }
 
-  // Get current language
+  /**
+   * Checks if the current article language is English
+   * @returns {boolean}
+   */
+  function isEnglishArticle() {
+    const language = getCurrentLanguage();
+    return language && language.toLowerCase() === 'english';
+  }
+
+  /**
+   * Gets the current article language from the sidebar
+   * @returns {string|null}
+   */
   function getCurrentLanguage() {
     const sidebar = document.querySelector('.side-panel');
     if (!sidebar) return null;
 
-    // Find the Language section
     const grids = sidebar.querySelectorAll('.grid.grid-cols-2');
-    for (let grid of grids) {
+    for (const grid of grids) {
       const firstCol = grid.querySelector('div:first-child');
-      if (firstCol && firstCol.textContent.includes('Language')) {
+      if (firstCol?.textContent.includes('Language')) {
         const secondCol = grid.querySelector('.col-span-1');
-        if (secondCol) {
-          const languageSpan = secondCol.querySelector('.truncate, span');
-          if (languageSpan) {
-            return languageSpan.textContent.trim();
-          }
+        const languageSpan = secondCol?.querySelector('.truncate, span');
+        if (languageSpan) {
+          return languageSpan.textContent.trim();
         }
       }
     }
     return null;
   }
 
-  // Create the Actions section HTML
-  function createActionsSection() {
-    const sectionId = `actions-section-${Date.now()}`;
-    const panelId = `actions-panel-${Date.now()}`;
+  /**
+   * Checks if the "Save as draft" button is enabled (indicating unsaved changes)
+   * @returns {boolean}
+   */
+  function hasUnsavedChanges() {
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const draftButton = buttons.find(btn => 
+      btn.textContent?.trim().includes('Save as draft')
+    );
+    
+    if (!draftButton) return false;
+    
+    return !draftButton.hasAttribute('disabled') && 
+           !draftButton.classList.contains('o__disabled');
+  }
+
+  /**
+   * Creates HTML string for the Actions section
+   * @returns {string}
+   */
+  function createActionsSectionHTML() {
+    const timestamp = Date.now();
+    const sectionId = `actions-section-${timestamp}`;
+    const panelId = `actions-panel-${timestamp}`;
     
     return `
       <div class="border-b border-neutral-border">
@@ -95,12 +153,7 @@
                           <div class="flex flex-col gap-4">
                             <div class="w-full">
                               <button id="actions-webhook-button" class="btn o__primary o__fit ember-view" role="button" type="button">
-                                <div class="flex items-center justify-center gap-2">
-                                  <svg class="interface-icon o__standard" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16C12.42 16 16 12.42 16 8C16 3.58 12.42 0 8 0ZM8 14.5C4.41 14.5 1.5 11.59 1.5 8C1.5 4.41 4.41 1.5 8 1.5C11.59 1.5 14.5 4.41 14.5 8C14.5 11.59 11.59 14.5 8 14.5ZM2.5 6.5C2.8 5.2 3.4 4 4.2 3L5.5 6.5H2.5ZM2.5 9.5H5.5L4.2 13C3.4 12 2.8 10.8 2.5 9.5ZM6.5 13.8C7.8 13.5 9 12.9 10 12.1L6.5 10.8V13.8ZM6.5 5.2V8.2L10 6.9C9 6.1 7.8 5.5 6.5 5.2ZM11.8 13L10.5 9.5H13.5C13.2 10.8 12.6 12 11.8 13ZM13.5 6.5H10.5L11.8 3C12.6 4 13.2 5.2 13.5 6.5Z"></path>
-                                  </svg>
-                                  <span>Translate to all languages</span>
-                                </div>
+                                ${BUTTON_HTML_IDLE}
                               </button>
                             </div>
                             <div class="text o__muted text-sm">
@@ -120,154 +173,223 @@
     `;
   }
 
-  // Insert Actions section between Data and Fin sections
+  /**
+   * Parses response from fetch request
+   * @param {Response} response
+   * @returns {Promise<string>}
+   */
+  async function parseResponse(response) {
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType?.includes('application/json')) {
+      try {
+        const data = await response.json();
+        return JSON.stringify(data, null, 2);
+      } catch {
+        return await response.text().catch(() => 'No response body');
+      }
+    }
+    
+    return await response.text().catch(() => 'No response body');
+  }
+
+  /**
+   * Updates button visual state based on language
+   * @param {HTMLButtonElement} button
+   */
+  function updateButtonState(button) {
+    const isEnglish = isEnglishArticle();
+    button.disabled = !isEnglish;
+    
+    if (!isEnglish) {
+      button.classList.add('opacity-50', 'cursor-not-allowed');
+      button.title = 'This action is only available for English articles';
+    } else {
+      button.classList.remove('opacity-50', 'cursor-not-allowed');
+      button.title = '';
+    }
+  }
+
+  /**
+   * Restores button to idle state
+   * @param {HTMLButtonElement} button
+   */
+  function restoreButtonContent(button) {
+    const buttonContent = button.querySelector('div');
+    if (buttonContent) {
+      buttonContent.innerHTML = BUTTON_HTML_IDLE.trim();
+    }
+  }
+
+  /**
+   * Sets button to loading state
+   * @param {HTMLButtonElement} button
+   */
+  function setButtonLoading(button) {
+    button.disabled = true;
+    const buttonContent = button.querySelector('div');
+    if (buttonContent) {
+      buttonContent.innerHTML = BUTTON_HTML_LOADING;
+    }
+  }
+
+  // ============================================================================
+  // Core Functions
+  // ============================================================================
+
+  /**
+   * Finds Data and Fin sections in the sidebar
+   * @param {Element} sidebarContainer
+   * @returns {{dataSection: Element|null, finSection: Element|null}}
+   */
+  function findTargetSections(sidebarContainer) {
+    const allSections = sidebarContainer.querySelectorAll('.border-b.border-neutral-border');
+    let dataSection = null;
+    let finSection = null;
+
+    for (const section of allSections) {
+      const text = section.textContent || '';
+      if (text.includes('Data') && text.includes('Type') && !dataSection) {
+        dataSection = section;
+      }
+      if (text.includes('Fin') && text.includes('When enabled, Fin will use')) {
+        finSection = section;
+        break;
+      }
+    }
+
+    return { dataSection, finSection };
+  }
+
+  /**
+   * Inserts Actions section into the sidebar
+   */
   async function insertActionsSection() {
     try {
-      // Wait for the sidebar structure to be available
-      const sidebarContainer = await waitForElement('.side-panel .overflow-auto > div', 5000).catch(() => null);
+      const sidebarContainer = await waitForElement(
+        '.side-panel .overflow-auto > div', 
+        SIDEBAR_WAIT_TIMEOUT_MS
+      ).catch(() => null);
       
       if (!sidebarContainer) {
-        console.warn('Sidebar container not found');
+        console.warn('[Intercom Actions] Sidebar container not found');
         return;
       }
       
       // Check if Actions section already exists
-      const existingActions = Array.from(sidebarContainer.querySelectorAll('[data-intercom-target="section"]')).find(
-        section => section.textContent && section.textContent.includes('Actions')
-      );
+      const existingActions = Array.from(
+        sidebarContainer.querySelectorAll('[data-intercom-target="section"]')
+      ).find(section => section.textContent?.includes('Actions'));
+      
       if (existingActions) {
-        // Re-initialize in case the page was updated
         initializeActionsSection();
         return;
       }
       
-      // Find the Data section (ends before Fin section)
-      const allSections = sidebarContainer.querySelectorAll('.border-b.border-neutral-border');
-      
-      if (allSections.length === 0) {
-        console.warn('No sections found in sidebar');
-        return;
-      }
+      const { dataSection, finSection } = findTargetSections(sidebarContainer);
 
-      // Find the Data section - it's the one before Fin
-      // We'll look for the section containing "Data" text
-      let dataSection = null;
-      let finSection = null;
-
-      for (let section of allSections) {
-        const text = section.textContent || '';
-        if (text.includes('Data') && text.includes('Type') && !dataSection) {
-          dataSection = section;
-        }
-        if (text.includes('Fin') && text.includes('When enabled, Fin will use')) {
-          finSection = section;
-          break;
-        }
-      }
-
-      // If we found both sections, insert between them
       if (dataSection && finSection) {
-        // Create and insert the Actions section
-        const actionsHTML = createActionsSection();
+        const actionsHTML = createActionsSectionHTML();
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = actionsHTML.trim();
         const actionsSection = tempDiv.firstElementChild;
 
-        // Insert after Data section, before Fin section
         dataSection.parentNode.insertBefore(actionsSection, finSection);
-
-        // Initialize the button and display info
-        setTimeout(initializeActionsSection, 100);
+        setTimeout(initializeActionsSection, INIT_AFTER_INSERT_MS);
       } else {
-        console.warn('Could not find Data or Fin sections, trying fallback');
-        // Fallback: try to insert after first section
+        console.warn('[Intercom Actions] Could not find Data or Fin sections, trying fallback');
+        const allSections = sidebarContainer.querySelectorAll('.border-b.border-neutral-border');
         if (allSections.length > 0) {
-          const actionsHTML = createActionsSection();
+          const actionsHTML = createActionsSectionHTML();
           const tempDiv = document.createElement('div');
           tempDiv.innerHTML = actionsHTML.trim();
           const actionsSection = tempDiv.firstElementChild;
           allSections[0].parentNode.insertBefore(actionsSection, allSections[1] || null);
-          setTimeout(initializeActionsSection, 100);
+          setTimeout(initializeActionsSection, INIT_AFTER_INSERT_MS);
         }
       }
     } catch (error) {
-      console.error('Error inserting Actions section:', error);
+      console.error('[Intercom Actions] Error inserting Actions section:', error);
     }
   }
 
-  // Check if "Save as draft" button is enabled (not disabled)
-  function isDraftButtonEnabled() {
-    // Look for button with "Save as draft" text
-    const buttons = Array.from(document.querySelectorAll('button'));
-    const draftButton = buttons.find(btn => 
-      btn.textContent && btn.textContent.trim().includes('Save as draft')
-    );
-    
-    if (!draftButton) {
-      // If draft button doesn't exist, assume it's safe to translate
-      return false;
+  /**
+   * Handles webhook button click
+   * @param {HTMLButtonElement} button
+   */
+  async function handleWebhookClick(button) {
+    // Validate language
+    if (!isEnglishArticle()) {
+      alert('This action is only available for English articles');
+      return;
     }
-    
-    // Check if button has disabled attribute or o__disabled class
-    const isDisabled = draftButton.hasAttribute('disabled') || 
-                       draftButton.classList.contains('o__disabled');
-    
-    // Return true if button is enabled (not disabled)
-    return !isDisabled;
+
+    // Validate unsaved changes
+    if (hasUnsavedChanges()) {
+      alert('Please save as draft first before translating');
+      return;
+    }
+
+    // Validate article ID
+    const articleId = getArticleId();
+    if (!articleId) {
+      alert('Error: Could not find article ID in URL');
+      return;
+    }
+
+    setButtonLoading(button);
+
+    try {
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ articleId })
+      });
+
+      const responseText = await parseResponse(response);
+      alert(`Webhook Response:\n\nStatus: ${response.status} ${response.statusText}\n\nResponse:\n${responseText}`);
+    } catch (error) {
+      alert(`Error calling webhook:\n\n${error.message}`);
+      console.error('[Intercom Actions] Webhook error:', error);
+    } finally {
+      updateButtonState(button);
+      restoreButtonContent(button);
+    }
   }
 
-  // Initialize the Actions section functionality
+  /**
+   * Initializes the Actions section functionality
+   */
   function initializeActionsSection() {
     const button = document.getElementById('actions-webhook-button');
     const articleIdSpan = document.getElementById('actions-article-id');
 
     if (!button) {
-      console.error('Actions button not found');
+      console.error('[Intercom Actions] Actions button not found');
       return;
     }
 
-    // Update displayed info
+    // Update displayed article ID
     const articleId = getArticleId();
-    const currentLanguage = getCurrentLanguage();
-
     if (articleIdSpan) {
       articleIdSpan.textContent = articleId || 'Not found';
     }
 
-    // Function to update button state based on language only
-    function updateButtonState() {
-      const currentLanguage = getCurrentLanguage();
-      const isEnglish = currentLanguage && currentLanguage.toLowerCase() === 'english';
-      const btn = document.getElementById('actions-webhook-button');
-      
-      if (!btn) return;
-      
-      // Only disable if not English
-      btn.disabled = !isEnglish;
-      
-      if (!isEnglish) {
-        btn.classList.add('opacity-50', 'cursor-not-allowed');
-        btn.title = 'This action is only available for English articles';
-      } else {
-        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        btn.title = '';
-      }
-    }
+    // Set initial button state
+    updateButtonState(button);
 
-    // Update button state initially
-    updateButtonState();
-
-    // Watch for language changes in sidebar only
-    let lastLanguage = currentLanguage;
+    // Watch for language changes
+    let lastLanguage = getCurrentLanguage();
     const languageObserver = new MutationObserver(() => {
       const newLanguage = getCurrentLanguage();
       if (newLanguage !== lastLanguage) {
         lastLanguage = newLanguage;
-        updateButtonState();
+        updateButtonState(button);
       }
     });
 
-    // Observe only the sidebar for language changes
     const sidebar = document.querySelector('.side-panel');
     if (sidebar) {
       languageObserver.observe(sidebar, {
@@ -277,115 +399,47 @@
       });
     }
 
-    // Remove any existing click handlers by cloning the button
+    // Remove existing handlers by cloning
     const newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
     const freshButton = document.getElementById('actions-webhook-button');
 
-    // Add click handler
-    freshButton.addEventListener('click', async () => {
-      // Check language first
-      const currentLanguage = getCurrentLanguage();
-      const isEnglish = currentLanguage && currentLanguage.toLowerCase() === 'english';
-      
-      if (!isEnglish) {
-        alert('This action is only available for English articles');
-        return;
-      }
-
-      // Check if user has unsaved changes
-      if (isDraftButtonEnabled()) {
-        alert('Please save as draft first before translating');
-        return;
-      }
-
-      const articleId = getArticleId();
-
-      if (!articleId) {
-        alert('Error: Could not find article ID in URL');
-        return;
-      }
-
-      // Disable button during request
-      freshButton.disabled = true;
-      const buttonContent = freshButton.querySelector('div');
-      if (buttonContent) {
-        buttonContent.innerHTML = '<span>Sending...</span>';
-      }
-
-      try {
-        // POST request - CORS is handled by host_permissions in manifest.json
-        const response = await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            articleId: articleId
-          })
-        });
-
-        let responseData;
-        const contentType = response.headers.get('content-type');
-        
-        if (contentType && contentType.includes('application/json')) {
-          try {
-            responseData = await response.json();
-          } catch (e) {
-            responseData = await response.text().catch(() => 'No response body');
-          }
-        } else {
-          responseData = await response.text().catch(() => 'No response body');
-        }
-
-        // Show alert with response
-        const responseText = typeof responseData === 'string' 
-          ? responseData 
-          : JSON.stringify(responseData, null, 2);
-        
-        alert(`Webhook Response:\n\nStatus: ${response.status} ${response.statusText}\n\nResponse:\n${responseText}`);
-      } catch (error) {
-        alert(`Error calling webhook:\n\n${error.message}`);
-        console.error('Webhook error:', error);
-      } finally {
-        // Re-enable button (check language state)
-        updateButtonState();
-        const buttonContent = freshButton.querySelector('div');
-        if (buttonContent) {
-          buttonContent.innerHTML = `
-            <svg class="interface-icon o__standard" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16C12.42 16 16 12.42 16 8C16 3.58 12.42 0 8 0ZM8 14.5C4.41 14.5 1.5 11.59 1.5 8C1.5 4.41 4.41 1.5 8 1.5C11.59 1.5 14.5 4.41 14.5 8C14.5 11.59 11.59 14.5 8 14.5ZM2.5 6.5C2.8 5.2 3.4 4 4.2 3L5.5 6.5H2.5ZM2.5 9.5H5.5L4.2 13C3.4 12 2.8 10.8 2.5 9.5ZM6.5 13.8C7.8 13.5 9 12.9 10 12.1L6.5 10.8V13.8ZM6.5 5.2V8.2L10 6.9C9 6.1 7.8 5.5 6.5 5.2ZM11.8 13L10.5 9.5H13.5C13.2 10.8 12.6 12 11.8 13ZM13.5 6.5H10.5L11.8 3C12.6 4 13.2 5.2 13.5 6.5Z"></path>
-            </svg>
-            <span>Translate to all languages</span>
-          `;
-        }
-      }
-    });
+    // Attach click handler
+    freshButton.addEventListener('click', () => handleWebhookClick(freshButton));
   }
 
-  // Main initialization
+  // ============================================================================
+  // Initialization
+  // ============================================================================
+
+  /**
+   * Main initialization function
+   */
   function init() {
-    // Wait a bit for the page to fully load
+    const scheduleInsert = () => {
+      setTimeout(insertActionsSection, INIT_DELAY_MS);
+    };
+
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(insertActionsSection, 1000);
-      });
+      document.addEventListener('DOMContentLoaded', scheduleInsert);
     } else {
-      setTimeout(insertActionsSection, 1000);
+      scheduleInsert();
     }
 
-    // Also listen for navigation changes (Intercom uses SPA)
+    // Watch for SPA navigation changes
     let lastUrl = location.href;
     new MutationObserver(() => {
-      const url = location.href;
-      if (url !== lastUrl) {
-        lastUrl = url;
-        setTimeout(insertActionsSection, 1000);
+      const currentUrl = location.href;
+      if (currentUrl !== lastUrl) {
+        lastUrl = currentUrl;
+        scheduleInsert();
       }
-    }).observe(document, { subtree: true, childList: true });
+    }).observe(document, { 
+      subtree: true, 
+      childList: true 
+    });
   }
 
   // Start the extension
   init();
 })();
-
