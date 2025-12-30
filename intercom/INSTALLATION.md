@@ -8,7 +8,7 @@
 
 Once downloaded:
 
-1. Open Chrome and go to `chrome://extensions/`
+1. Open Chrome and go to [chrome://extensions/](chrome://extensions/)
 2. Enable **"Developer mode"** (toggle in the top right corner)
 3. Drag and drop the downloaded `intercom.crx` file onto the extensions page
 4. Click **"Add extension"** when prompted
@@ -17,7 +17,7 @@ Once downloaded:
 ### Option 2: Install from folder
 
 1. Download and extract the `intercom` folder
-2. Open Chrome and go to `chrome://extensions/`
+2. Open Chrome and go to [chrome://extensions/](chrome://extensions/)
 3. Enable **"Developer mode"** (toggle in the top right corner)
 4. Click **"Load unpacked"**
 5. Select the `intercom` folder
@@ -41,7 +41,7 @@ Once downloaded:
 - **Language requirement**: The button only works for articles in English. It will be disabled for other languages.
 
 - **Updates**: If the extension is updated, you may need to reload it:
-   - Go to `chrome://extensions/`
+   - Go to [chrome://extensions/](chrome://extensions/)
    - Find "ABUGO Intercom actions" extension
    - Click the refresh icon (🔄) on the extension card
 
@@ -51,7 +51,7 @@ Once downloaded:
 
 **Extension not showing up?**
 - Make sure Developer mode is enabled
-- Try reloading the extension (refresh icon in `chrome://extensions/`)
+- Try reloading the extension (refresh icon in [chrome://extensions/](chrome://extensions/))
 - Refresh the Intercom page
 
 **Button is disabled?**
